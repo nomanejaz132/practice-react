@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
 function Comments({ postId }) {
-  const [comments, setComments] = useState(null);
-  const [errorComments, setErrorComments] = useState(null);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [comments, setComments] = useState({
+    data: null,
+    error: null,
+    loading: false,
+  });
 
   useEffect(() => {
-    setIsLoadingComments(true);
+    setComments((prevState) => ({ ...prevState, loading: true }));
     fetch(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`)
       .then((response) => {
         if (!response.ok) {
@@ -15,13 +17,19 @@ function Comments({ postId }) {
         return response.json();
       })
       .then((data) => {
-        setComments(data);
-        setIsLoadingComments(false);
+        setComments((prevState) => ({
+          ...prevState,
+          data: data,
+          loading: false,
+        }));
       })
       .catch((error) => {
-        setErrorComments(error.message);
+        setComments((prevState) => ({
+          ...prevState,
+          error: error.message,
+          loading: false,
+        }));
         console.error('Error:', error);
-        setIsLoadingComments(false);
       });
 
     return () => {
@@ -29,25 +37,23 @@ function Comments({ postId }) {
     };
   }, [postId]);
 
-  console.log('comment');
-
-  if (isLoadingComments)
+  if (comments.loading)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
         Loading...
       </h4>
     );
 
-  if (errorComments)
+  if (comments.error)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
-        {errorComments}
+        {comments.error}
       </h4>
     );
 
   return (
     <div className="flex flex-wrap gap-4 h-[60vh] overflow-auto px-5">
-      {comments?.map((comment) => {
+      {comments?.data?.map((comment) => {
         return (
           <div
             key={comment.id}

@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import Comments from './Comments';
 
 function PostsDetail({ postId, onBackClick }) {
-  const [postDetail, setPostDetail] = useState(null);
-  const [errorPost, setErrorPost] = useState(null);
-  const [isLoadingPost, setIsLoadingPost] = useState(false);
+  const [postDetail, setPostDetail] = useState({
+    data: null,
+    error: null,
+    loading: false,
+  });
 
   useEffect(() => {
-    setIsLoadingPost(true);
+    setPostDetail((prevState) => ({ ...prevState, loading: true }));
     fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`)
       .then((response) => {
         if (!response.ok) {
@@ -19,29 +21,35 @@ function PostsDetail({ postId, onBackClick }) {
         return response.json();
       })
       .then((data) => {
-        setPostDetail(data);
-        setIsLoadingPost(false);
+        setPostDetail((prevState) => ({
+          ...prevState,
+          data: data,
+          loading: false,
+        }));
       })
       .catch((error) => {
-        setErrorPost(error.message);
+        setPostDetail((prevState) => ({
+          ...prevState,
+          error: error.message,
+          loading: false,
+        }));
         console.error('Error:', error);
-        setIsLoadingPost(false);
       });
   }, [postId]);
 
   console.log('post detail');
 
-  if (isLoadingPost)
+  if (postDetail.loading)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
         Loading...
       </h4>
     );
 
-  if (errorPost)
+  if (postDetail.error)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
-        {errorPost}
+        {postDetail.error}
       </h4>
     );
 
@@ -73,7 +81,7 @@ function PostsDetail({ postId, onBackClick }) {
             Comments
           </h4>
         </div>
-        {postDetail && <Comments postId={postId} />}
+        {postDetail.data && <Comments postId={postId} />}
       </div>
     </div>
   );

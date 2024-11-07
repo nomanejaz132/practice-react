@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import PostsDetail from './PostDetail';
 
 function PostsListing() {
-  const [postListing, setPostListing] = useState(null);
-  const [errorPosts, setErrorPosts] = useState(null);
-  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [posts, setPosts] = useState({
+    data: null,
+    error: null,
+    loading: false,
+    selectedPost: null,
+  });
 
   useEffect(() => {
-    setIsLoadingPosts(true);
+    setPosts((prevState) => ({ ...prevState, loading: true }));
     fetch('https://jsonplaceholder.typicode.com/posts')
       .then((response) => {
         if (!response.ok) {
@@ -17,33 +19,51 @@ function PostsListing() {
         return response.json();
       })
       .then((data) => {
-        setPostListing(data);
-        setIsLoadingPosts(false);
+        setPosts((prevState) => ({
+          ...prevState,
+          data: data,
+          loading: false,
+        }));
       })
       .catch((error) => {
-        setErrorPosts(error.message);
+        setPosts((prevState) => ({
+          ...prevState,
+          error: error.message,
+          loading: false,
+        }));
         console.error('Error:', error);
-        setIsLoadingPosts(false);
       });
   }, []);
 
+  const handleSelectPost = (postId) => [
+    setPosts((prevState) => ({
+      ...prevState,
+      selectedPost: postId,
+    })),
+  ];
+
   const handleBack = () => {
-    setSelectedPost(null);
+    setPosts((prevState) => ({
+      ...prevState,
+      selectedPost: null,
+    }));
   };
 
-  if (isLoadingPosts)
+  if (posts.loading)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
         Loading...
       </h4>
     );
 
-  if (errorPosts)
+  if (posts.error)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
-        {errorPosts}
+        {posts.error}
       </h4>
     );
+
+  console.log(posts.selectedPost);
 
   return (
     <div className="flex flex-col h-screen overflow-y-auto px-5">
@@ -51,16 +71,16 @@ function PostsListing() {
         <h3 className="sticky top-0 w-[420px] bg-white py-5 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           List of all the Posts
         </h3>
-        {selectedPost ? (
-          <PostsDetail postId={selectedPost} onBackClick={handleBack} />
+        {posts.selectedPost ? (
+          <PostsDetail postId={posts.selectedPost} onBackClick={handleBack} />
         ) : (
-          postListing?.length > 0 && (
+          posts?.data?.length > 0 && (
             <div className="grid grid-cols-1 max-w-[400px] py-4 gap-4">
-              {postListing.map((post) => {
+              {posts?.data?.map((post) => {
                 return (
                   <div
                     key={post.id}
-                    onClick={() => setSelectedPost(post.id)}
+                    onClick={() => handleSelectPost(post.id)}
                     className="bg-white shadow-md rounded-xl p-5 h-auto border border-gray-300 cursor-pointer"
                   >
                     <div className="flex flex-col gap-2">
