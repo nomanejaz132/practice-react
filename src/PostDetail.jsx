@@ -1,55 +1,25 @@
 import { ChevronLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import Comments from './Comments';
+import useFetchData from './hooks/useFetchData';
 
 function PostsDetail({ postId, onBackClick }) {
-  const [postDetail, setPostDetail] = useState({
-    data: null,
-    error: null,
-    loading: false,
-  });
+  const {
+    data: postDetail,
+    loading,
+    error,
+  } = useFetchData(`https://jsonplaceholder.typicode.com/posts/${postId}`);
 
-  useEffect(() => {
-    setPostDetail((prevState) => ({ ...prevState, loading: true }));
-    fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            'Network response was not ok, unable to load post detail'
-          );
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setPostDetail((prevState) => ({
-          ...prevState,
-          data: data,
-          loading: false,
-        }));
-      })
-      .catch((error) => {
-        setPostDetail((prevState) => ({
-          ...prevState,
-          error: error.message,
-          loading: false,
-        }));
-        console.error('Error:', error);
-      });
-  }, [postId]);
-
-  console.log('post detail');
-
-  if (postDetail.loading)
+  if (loading)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
         Loading...
       </h4>
     );
 
-  if (postDetail.error)
+  if (error)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
-        {postDetail.error}
+        {error}
       </h4>
     );
 
@@ -81,7 +51,7 @@ function PostsDetail({ postId, onBackClick }) {
             Comments
           </h4>
         </div>
-        {postDetail.data && <Comments postId={postId} />}
+        {postDetail && <Comments postId={postId} />}
       </div>
     </div>
   );

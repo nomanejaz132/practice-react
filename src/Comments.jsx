@@ -1,59 +1,31 @@
-import { useEffect, useState } from 'react';
+import useFetchData from './hooks/useFetchData';
 
 function Comments({ postId }) {
-  const [comments, setComments] = useState({
-    data: null,
-    error: null,
-    loading: false,
-  });
+  const {
+    data: comments,
+    loading,
+    error,
+  } = useFetchData(
+    `https://jsonplaceholder.typicode.com/posts/${postId}/comments`
+  );
 
-  useEffect(() => {
-    setComments((prevState) => ({ ...prevState, loading: true }));
-    fetch(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Something went wrong, unable to load comments');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setComments((prevState) => ({
-          ...prevState,
-          data: data,
-          loading: false,
-        }));
-      })
-      .catch((error) => {
-        setComments((prevState) => ({
-          ...prevState,
-          error: error.message,
-          loading: false,
-        }));
-        console.error('Error:', error);
-      });
-
-    return () => {
-      console.log('Comment is unmounted');
-    };
-  }, [postId]);
-
-  if (comments.loading)
+  if (loading)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
         Loading...
       </h4>
     );
 
-  if (comments.error)
+  if (error)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
-        {comments.error}
+        {error}
       </h4>
     );
 
   return (
     <div className="flex flex-wrap gap-4 h-[60vh] overflow-auto px-5">
-      {comments?.data?.map((comment) => {
+      {comments?.map((comment) => {
         return (
           <div
             key={comment.id}
