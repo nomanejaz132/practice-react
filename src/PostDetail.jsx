@@ -29,6 +29,8 @@ function PostsDetail({ postId, onBackClick }) {
       });
   }, [postId]);
 
+  console.log('post detail');
+
   if (isLoadingPost)
     return (
       <h4 className="py-10 text-center text-sm leading-6 font-semibold text-slate-900">
@@ -71,7 +73,7 @@ function PostsDetail({ postId, onBackClick }) {
             Comments
           </h4>
         </div>
-        <Comments postId={postId} />
+        {postDetail && <Comments postId={postId} />}
       </div>
     </div>
   );

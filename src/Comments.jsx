@@ -23,7 +23,13 @@ function Comments({ postId }) {
         console.error('Error:', error);
         setIsLoadingComments(false);
       });
+
+    return () => {
+      console.log('Comment is unmounted');
+    };
   }, [postId]);
+
+  console.log('comment');
 
   if (isLoadingComments)
     return (
